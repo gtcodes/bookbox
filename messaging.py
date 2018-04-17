@@ -6,6 +6,8 @@ from oauth2client import file, client, tools
 from apiclient.discovery import build
 from apiclient import errors
 
+RECEIVER = 'joker@gtg.se'
+SENDER = 'youremail@gmail.com'
 SCOPES = 'https://www.googleapis.com/auth/gmail.send'
 
 def getCredentials():
@@ -18,7 +20,8 @@ def getCredentials():
     return service
 
 # send message
-def SendMessage(service, sender, to, subject, msgHtml, msgPlain):
+def SendMessage(sender, to, subject, msgHtml, msgPlain):
+    service = getCredentials()
     message = CreateMessageHtml(sender, to, subject, msgHtml, msgPlain)
     try:
         message = (service.users().messages().send(userId="me", body=message).execute())
@@ -42,11 +45,7 @@ def CreateMessageHtml(sender, to, subject, msgHtml, msgPlain):
     return {'raw': raw}
 
 def testSend():
-    service = getCredentials()
-
-    to = "joker@gtg.se"
-    sender = "youremail@gmail.com"
     subject = "testmail from python"
     msgHtml = "Hi<br/>Html Email"
     msgPlain = "Hi\nPlain Email"
-    SendMessage(service, sender, to, subject, msgHtml, msgPlain)
+    SendMessage(SENDER, RECEIVER, subject, msgHtml, msgPlain)
