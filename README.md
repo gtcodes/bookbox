@@ -4,6 +4,8 @@ In the bookbox there is (or will be) a microcontroller (adafruit feather huzzah 
 The webserver will send an email to joker@gtg.se to notify them to empty the box.
 
 ## Setup
+1. install python 
+1. install flask `pip install flask`
 1. follow step 1 and 2 of this guide https://developers.google.com/gmail/api/quickstart/python
 2. run `python bookbox.py`
 3. a browser opens, just follow the steps and allow the app to send mails
