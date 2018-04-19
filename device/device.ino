@@ -1,6 +1,7 @@
 /* 
  * Bookbox notification device code
  * Created 2018-04-17
+ * For deepsleep to work properly we need to connect gpio16 to rst
  */
 
 #include <Arduino.h>
@@ -34,32 +35,33 @@ void setup() {
 
 void loop() {
     // wait for WiFi connection
-    if((WiFiMulti.run() == WL_CONNECTED)) {
-
-        HTTPClient http;
-
-        USE_SERIAL.print("[HTTP] begin...\n");
-        http.begin("http://192.168.0.100:5000/"); //HTTP
-        http.addHeader("Content-Type", "application/x-www-form-urlencoded");
-        int httpCode = http.POST("level=40");
-
-        // httpCode will be negative on error
-        if(httpCode > 0) {
-            // HTTP header has been send and Server response header has been handled
-            USE_SERIAL.printf("[HTTP] POST... code: %d\n", httpCode);
-
-            // file found at server
-            if(httpCode == HTTP_CODE_OK) {
-                String payload = http.getString();
-                USE_SERIAL.println(payload);
-            }
-        } else {
-            USE_SERIAL.printf("[HTTP] POST... failed, error: %s\n", http.errorToString(httpCode).c_str());
-        }
-
-        http.end();
+    while(WiFiMulti.run() != WL_CONNECTED) {
+      delay(2);
     }
 
-    delay(10000);
+    HTTPClient http;
+
+    USE_SERIAL.print("[HTTP] begin...\n");
+    http.begin("http://192.168.0.100ä:5000/"); //Server address
+    http.addHeader("Content-Type", "application/x-www-form-urlencoded");
+    int httpCode = http.POST("level=40"); //TODO: Add actual value here
+
+    // httpCode will be negative on error
+    if(httpCode > 0) {
+        // HTTP header has been send and Server response header has been handled
+        USE_SERIAL.printf("[HTTP] POST... code: %d\n", httpCode);
+
+        // file found at server
+        if(httpCode == HTTP_CODE_OK) {
+            String payload = http.getString();
+            USE_SERIAL.println(payload);
+        }
+    } else {
+        USE_SERIAL.printf("[HTTP] POST... failed, error: %s\n", http.errorToString(httpCode).c_str());
+    }
+
+    http.end();
+    USE_SERIAL.println("going into hibernation");
+    ESP.deepSleep(1000*1000*5); //sleep for 5 seconds TODO: Change this to 1 hour when deploying
 }
 
