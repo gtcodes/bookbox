@@ -18,10 +18,6 @@ ESP8266WiFiMulti WiFiMulti;
 void setup() {
     USE_SERIAL.begin(115200);
 
-    USE_SERIAL.println();
-    USE_SERIAL.println();
-    USE_SERIAL.println();
-
     for(uint8_t t = 4; t > 0; t--) {
         USE_SERIAL.printf("[SETUP] WAIT %d...\n", t);
         USE_SERIAL.flush();
@@ -29,11 +25,15 @@ void setup() {
     }
 
     WiFi.mode(WIFI_STA);
-    WiFiMulti.addAP("JOKERNET", "password");
-
+    WiFiMulti.addAP("APNAME", "password");
 }
 
 void loop() {
+    
+    USE_SERIAL.println(analogRead(A0));
+    int level = getLevel();
+    USE_SERIAL.println(level);
+    
     // wait for WiFi connection
     while(WiFiMulti.run() != WL_CONNECTED) {
       delay(2);
@@ -42,9 +42,12 @@ void loop() {
     HTTPClient http;
 
     USE_SERIAL.print("[HTTP] begin...\n");
-    http.begin("http://192.168.0.100ä:5000/"); //Server address
+    http.begin("http://192.168.0.100:5000/"); //Server address
     http.addHeader("Content-Type", "application/x-www-form-urlencoded");
-    int httpCode = http.POST("level=40"); //TODO: Add actual value here
+    String post = "level=";
+    String finalPost = post + level;
+    USE_SERIAL.println(finalPost);
+    int httpCode = http.POST(finalPost);
 
     // httpCode will be negative on error
     if(httpCode > 0) {
@@ -61,7 +64,15 @@ void loop() {
     }
 
     http.end();
+    
     USE_SERIAL.println("going into hibernation");
-    ESP.deepSleep(1000*1000*5); //sleep for 5 seconds TODO: Change this to 1 hour when deploying
+    ESP.deepSleep(1000*5); //sleep for 5 seconds TODO: Change this to 1 hour when deploying
+}
+
+int getLevel() {
+  //max value is 824 and least is 294
+  int level = analogRead(A0);
+  level = (level - 270) * 100/540 ;
+  return level;
 }
 
