@@ -40,9 +40,9 @@ class Alarm():
     def check_if_report_or_alarm(self):
         self.counter = self.counter + 1
         print(self.counter)
-        if counter > 120:
+        if self.counter > 120:
             print("no report received the last two hours")
-            sendBatteryWarning(counter)
+            sendBatteryWarning(self.counter)
 
     def sendBatteryWarning(self, counter):
         subject = "WARNING: Bookbox is not reporting, battery may be low"
@@ -54,7 +54,7 @@ class Alarm():
               '<li>Battery low: please charge the battery by plugging in the device using a micro-usb cable </li>' \
               '<li>Lost connection to wifi: Make sure the router in personalrum 1 is on and working</li>' \
               '<li>Other problem: contact previous joker-teachers</li>' \
-              '</ul>' \
+              '</ul>' 
         msgPlain = 'Bookbox is not reporting, check battery and wifi. Doesn\'t work? contact previous joker-teachers'
         SendMessage(SENDER, RECEIVER, subject, msgHtml, msgPlain)
 
